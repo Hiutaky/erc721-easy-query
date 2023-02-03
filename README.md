@@ -1,4 +1,4 @@
-# ERC721query: retrieve all the owned NFT tokens of a specific collection
+# ERC721query: retrieve in 1 shot all the User's Owned Token Ids of a NFT collection
 
 Easily get all the owned NFTs of a specific user and speedup your Frontends.
 
