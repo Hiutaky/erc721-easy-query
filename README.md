@@ -37,7 +37,7 @@ Get all the tokens of a specific collection owned by an user
     console.log(
         await getTokens({
             contractAddress: collectionToFetch,
-            userAddress: ""
+            userAddress: userToFetch
         })
     )
 ```
