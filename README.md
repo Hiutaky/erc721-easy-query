@@ -15,13 +15,30 @@ After having implemented the contract in the frontend using a library like ether
 
 Get all the tokens of a specific collection owned by an user
 ```
-    const ERC721Utils = new ethers.Contract(contractAddress, contractAbi, signer )
-    const getAllNfts = async (accountAddress, contractToQuery) => {
-        let ids = await ERC721Utils.getOwnedTokens(
-            contractToQuery.address, // .address is needed if contractToQuery is a ethers.Contract instance
-            accountAddress
-        )
-        return ids
+    const collectionToFetch = "0xF87A517A5CaecaA03d7cCa770789BdB61e09e05F"
+    const userToFetch = "0xA90aa632c7928Eb4caFe8FE71fb30cD7bD033C46"
+    const easyQuery = new ethers.Contract(contractAddress, contractAbi, signer )
+    export const getTokens = async ({
+        contractAddress,
+        userAddress
+    }) => {
+        const pages = await easyQuery.getPages(contractAddress, userAddress)
+        let tokens = []
+        for( let i = 0; i <= pages; i++ )
+            tokens = tokens.concat( await easyQuery.getOwnedTokens(
+                contractAddress,
+                userAddress,
+                i
+            ) )
+        tokens = tokens.map( tokenId => tokenId.toString())
+        return tokens
     }
+
+    console.log(
+        await getTokens({
+            contractAddress: collectionToFetch,
+            userAddress: ""
+        })
+    )
 ```
 

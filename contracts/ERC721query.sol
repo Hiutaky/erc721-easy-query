@@ -11,19 +11,42 @@ pragma solidity ^0.8.4;
  */
 
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
-
 contract ERC721query {
     /**
         Pass the collection and the user we want to query and receive back an array containing all the owned nfts
      */
-    function getOwnedTokens( address _collection, address owner ) external view returns(uint[] memory) {
+
+    uint public tokenPerPage = 20;
+
+    function getOwnedTokens( address _collection, address owner, uint page ) external view returns(uint[] memory) {
         if( ! _isContract(_collection ) ) revert("NOT_CONTRACT");
         IERC721Enumerable collection = IERC721Enumerable(_collection);
         uint balance = collection.balanceOf(owner);
-        uint[] memory tokens = new uint[](balance);
-        for(uint i = 0; i < balance; i++)
-            tokens[i] = collection.tokenOfOwnerByIndex(owner, i);
+        uint[] memory empty = new uint[](0);
+        if( balance == 0) return empty;
+        uint startIndex = page > 0 ? tokenPerPage * page : 0;
+        uint toQuery = 
+            balance < tokenPerPage ?
+                balance : 
+                page > 0 ? 
+                    tokenPerPage * ( page + 1) :
+                    tokenPerPage;
+        
+        toQuery = toQuery > balance ? balance : toQuery;
+        uint delta = toQuery - startIndex;
+        uint[] memory tokens = new uint[](delta);
+        for(uint i = 0; i + startIndex < toQuery; i++)
+            tokens[i] = collection.tokenOfOwnerByIndex(owner, startIndex + i);
         return tokens;
+    }
+
+    function getPages(address _collection, address owner) external view returns(uint) {
+        IERC721Enumerable collection = IERC721Enumerable(_collection);
+        uint balance = collection.balanceOf(owner);
+        uint pages = balance > 0 ? balance / tokenPerPage : 0;
+        bool hasOffset = balance > 0 ? pages * tokenPerPage == balance ? false : true : false;
+        pages = hasOffset ? pages++ : pages; 
+        return pages;
     }
 
     /** check if the collection address is a contract */
